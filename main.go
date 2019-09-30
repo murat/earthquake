@@ -62,6 +62,14 @@ func run() {
 	c.OnHTML("body > pre", func(e *colly.HTMLElement) {
 		table := strings.Split(e.Text, "--------------")
 		rows := strings.Split(table[len(table)-1], "\n")
+
+		loc, err := time.LoadLocation("Europe/Istanbul")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		LOCALDATETIME := "2006-01-02T03:04:05GMT"
+
 		for _, row := range rows {
 			if len(row) > 0 {
 				parsed := regexp.MustCompile(`\s+`).Split(row, 10)
@@ -74,8 +82,8 @@ func run() {
 				mw, _ := strconv.ParseFloat(parsed[7], 64)
 
 				dots := regexp.MustCompile(`\.`)
-				dateString := dots.ReplaceAllString(parsed[0], "-") + "T" + parsed[1] + "+30:00"
-				dateTime, _ := time.Parse(time.RFC3339, dateString)
+				dateString := dots.ReplaceAllString(parsed[0], "-") + "T" + parsed[1] + "GMT"
+				dateTime, _ := time.ParseInLocation(LOCALDATETIME, dateString, loc)
 
 				spaces := regexp.MustCompile(`\s+`)
 				d := earthquake{
@@ -99,13 +107,13 @@ func run() {
 	c.Visit("http://www.koeri.boun.edu.tr/scripts/lst4.asp")
 
 	last := last(earthquakes)
-	biggers := biggers(last)
+	filtered := filter(last)
 
-	for _, x := range biggers {
+	for _, x := range filtered {
 		beeep.Notify(
 			"BDTİM Uyarı "+x.Date+" "+x.Time,
-			fmt.Sprintf("%s de %v şiddetinde earthquake oldu.", x.Yer, x.Ml),
-			"assets/logo.gif",
+			fmt.Sprintf("%s de %v şiddetinde deprem oldu.", x.Yer, x.Ml),
+			"assets/logo.png",
 		)
 	}
 
@@ -120,11 +128,10 @@ func last(list []earthquake) []earthquake {
 			newlist = append(newlist, x)
 		}
 	}
-
 	return newlist
 }
 
-func biggers(list []earthquake) []earthquake {
+func filter(list []earthquake) []earthquake {
 	newlist := list[:0]
 	for _, x := range list {
 		if x.Ml > min {
