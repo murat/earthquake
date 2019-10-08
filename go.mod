@@ -11,6 +11,7 @@ require (
 	github.com/gen2brain/beeep v0.0.0-20190719094215-ece0cb67ca77
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/gocolly/colly v1.2.0
+	github.com/godbus/dbus v4.1.0+incompatible // indirect
 	github.com/kardianos/service v1.0.0
 	github.com/kennygrant/sanitize v1.2.4 // indirect
 	github.com/lestrrat-go/strftime v0.0.0-20190725011945-5c849dd2c51d
